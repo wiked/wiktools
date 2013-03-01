@@ -11,7 +11,9 @@ function wikWindow(cvs)
   this.font = "20px Georgia";
   this.borderColor = "#000000";
   this.headFontColor = "#808080";
-  this.bg = "#F0F0F0";
+  this.headBorderColor = "#000000";
+  this.headColor = "#F0F0F0";
+  this.bg = "#FFFFFF";
 
   //--------------------------------
   //wikWindow.getGraphics()
@@ -26,20 +28,38 @@ function wikWindow(cvs)
     return this.twod;
   };
 
-
-  this.drawWindow = function()
+  this.drawHead = function()
   {
     var g = this.getGraphics();
-    g.fillStyle = this.bg;
-    g.fillRect(this.whyx.x, this.whyx.y, this.whyx.w, this.whyx.h);
-    g.fillStyle = this.borderColor;
-    g.strokeRect(this.whyx.x, this.whyx.y, this.whyx.w, this.whyx.h);
+    g.lineWidth = 0.5;
+
+    g.fillStyle = this.headColor;
+    g.fillRect(this.whyx.x+1, this.whyx.y+1, this.whyx.w-2, 30-2);
+
+    g.strokeStyle = this.headBorderColor;
+    g.beginPath();
+    //TODO: incorporate different head font sizes
+    g.moveTo(this.whyx.x, this.whyx.y+30);
+    g.lineTo(this.whyx.x + this.whyx.w, this.whyx.y + 30);
+    g.stroke();
     g.fillStyle = this.headFontColor;
     g.font = this.font;
     var txtInfo = g.measureText(this.title);
     var leftPad = this.whyx.x + ((this.whyx.w - txtInfo.width)/2); //TODO: account for LOOOOOOOOOOONG titles.
     var topPad = this.whyx.y + 24;
     g.fillText(this.title,leftPad,topPad);
+
+  }
+
+  this.drawWindow = function()
+  {
+    var g = this.getGraphics();
+    g.fillStyle = this.bg;
+    g.lineWidth = 0.5;
+    g.fillRect(this.whyx.x, this.whyx.y, this.whyx.w, this.whyx.h);
+    g.fillStyle = this.borderColor;
+    g.strokeRect(this.whyx.x, this.whyx.y, this.whyx.w, this.whyx.h);
+    this.drawHead();
   };
 
   //--------------------------------
