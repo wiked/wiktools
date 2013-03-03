@@ -3,6 +3,7 @@
 // Delacroix is our mouse handler.
 //    "Attention mesdames et messieurs..."
 var delacroix = null
+var wikMaster = null;
 
 
 function wikWindow(cvs)
@@ -37,10 +38,12 @@ function wikWindow(cvs)
     return this.twod;
   };
 
-  this.drawHead = function()
+  this.draw = function()
   {
-
+    this.drawWindow();
   }
+
+  wikMaster.add(this);
 
   this.drawWindow = function()
   {
@@ -79,6 +82,20 @@ function wikWindow(cvs)
   this.mouseMod.mouseMove = function(evt, pe)
   {
     this.prnt.drawWindow();
+  }
+
+  this.mouseMod.afterMove = function(diffPoint)
+  {
+    this.moveBounds(diffPoint);
+    var objs = this.prnt.otherObjs;
+    if(objs)
+    {
+      for(i = 0; i < objs.length; ++i)
+      {
+        objs[i].mouseMod.move(diffPoint);
+      }
+    }
+    wikMaster.redraw();
   }
 
   this.mouseMod.resize = function()
@@ -121,22 +138,36 @@ function wikMouseMod(pw)
   this.resize    = function(){};
   this.mouseMove = function(evt,pe){};
   this.mouseDown = function(evt,pe){};
+  this.afterMove = function(diffPoint){};
+
   this.reboundToRect = function(rect)
   {
    this.bounds = {x:rect.x, y:rect.y, h:rect.h, w:rect.w};
-  }
+  };
 
+  this.move = function(diffPoint)
+  {
+    this.whyx.x += diffPoint.x;
+    this.whyx.y += diffPoint.y;
+    this.afterMove(diffPoint);
+  };
+
+  this.moveBounds = function(diffPoint)
+  {
+    this.bounds.x += diffPoint.x;
+    this.bounds.y += diffPoint.y;
+  };
 
   this.checkBounds = function(evt,pe)
   {
     return (pe.x >= this.bounds.x && pe.x <= (this.bounds.x + this.bounds.w)) && (pe.y >= this.bounds.y && pe.y <= (this.bounds.y + this.bounds.h));
-  }
+  };
 
 
   this.resizeToRect = function(rect)
   {
    this.whyx = {x:rect.x, y:rect.y, h:rect.h, w:rect.w};
-  }
+  };
 }
 
 function wikWindowHead(pw)
@@ -158,7 +189,6 @@ function wikWindowHead(pw)
 
 
 
-
   this.mouseMod.mouseDown = function(evt, pe)
   {
     if(this.checkBounds(evt,pe))
@@ -167,6 +197,23 @@ function wikWindowHead(pw)
       this.prnt.draw(this.prnt.prnt.getGraphics());
     }
   };
+
+  this.mouseMod.mouseMove = function(evt,pe)
+  {
+    if(this.checkBounds(evt,delacroix.downPoint) && delacroix.down)
+    {
+      var moveX = pe.x - delacroix.downPoint.x;
+      var moveY = pe.y - delacroix.downPoint.y;
+      delacroix.downPoint.x += moveX;
+      delacroix.downPoint.y += moveY;
+
+      var diffPoint = {x:moveX, y:moveY};
+      this.moveBounds(diffPoint);
+      this.prnt.prnt.mouseMod.move(diffPoint);
+    }
+  }
+
+
 
   wikAddToMouseHandler(this);
 
@@ -219,18 +266,21 @@ function wikMouseHandler(cvs)
 
   this.mouseDown = function(evt)
   {
-    delacroix.down = 1;
-    var pe = delacroix.wndTranslate(evt, this);
-    delacroix.downPoint = {x: pe.x, y:pe.y};
-    var gens = delacroix.audience;
-    if(gens)
+    if(!delacroix.down)
     {
-      delacroix.continue = 1;
-      for(i = 0; i < gens.length && delacroix.continue; ++i)
+      delacroix.down = 1;
+      var pe = delacroix.wndTranslate(evt, this);
+      delacroix.downPoint = {x: pe.x, y:pe.y};
+      var gens = delacroix.audience;
+      if(gens)
       {
-        if(gens[i].mouseMod)
+        delacroix.continue = 1;
+        for(i = 0; i < gens.length && delacroix.continue; ++i)
         {
-          gens[i].mouseMod.mouseDown(evt, pe);
+          if(gens[i].mouseMod)
+          {
+            gens[i].mouseMod.mouseDown(evt, pe);
+          }
         }
       }
     }
@@ -250,6 +300,13 @@ function wikMouseHandler(cvs)
     }
   }
   this.cvs.onmousemove = this.mouseMove;
+
+  this.mouseUp = function(evt)
+  {
+    delacroix.down = 0;
+  }
+
+  this.cvs.onmouseup = this.mouseUp;
 
   this.add = function(obj)
   {
@@ -296,14 +353,18 @@ function wikLabel(w)
 
 function wikTestWindow()
 {
+
   var c = document.getElementById("testCanvas");
+  wikMaster = new wikGlobal(c);
   delacroix = new wikMouseHandler(c);
   var w = new wikWindow(c);
+
   return w;
 }
 
 function wikTest()
 {
+
 
   var w = wikTestWindow();
   w.mouseMod.whyx = {x: 50, y:100, h: 200, w: 400};
@@ -317,5 +378,36 @@ function wikTest()
   wikAddToMouseHandler(w);
 
 
-  w.drawWindow();
+  wikMaster.redraw();
 }
+
+
+function wikGlobal(cvs)
+{
+  this.cvs = cvs;
+  this.bgColor = "#A0FFA0";
+  this.audience = [];
+
+  this.add = function(obj)
+  {
+    if(obj.draw)
+    {
+      this.audience.push(obj);
+    }
+  };
+
+  this.redraw = function()
+  {
+    var g = this.cvs.getContext("2d");
+    g.fillStyle = this.bgColor;
+    g.fillRect(0,0,this.cvs.width, this.cvs.height);
+    if(this.audience)
+    {
+      for(i = 0; i < this.audience.length; ++i)
+      {
+        this.audience[i].draw();
+      }
+    }
+  };
+}
+
