@@ -191,6 +191,8 @@ function wikMouseMod(pw)
   this.mouseMove = function(evt,pe){};
   this.mouseDown = function(evt,pe){};
   this.afterMove = function(diffPoint){};
+  this.mouseUp = function(evt, pe){};
+  this.doMouseUp = false;
 
 
   //wikMouseMod.reboundToRect
@@ -241,6 +243,7 @@ function wikWindowHead(pw)
   this.headColor = "#F0F0F0";
   this.font = "20px Georgia";
 
+
   //wikWindowHead.resize
   this.mouseMod.resize = function()
   {
@@ -248,7 +251,7 @@ function wikWindowHead(pw)
     this.resizeToRect(this.prnt.prnt.mouseMod.whyx);
     this.bounds.h = 30;
   };
-  
+
   //wikWindowHead.cleanUp
   this.cleanUp = function()
   {
@@ -263,6 +266,18 @@ function wikWindowHead(pw)
     {
       this.prnt.headColor = "#FF00FF";
       this.prnt.draw(this.prnt.prnt.getGraphics());
+      this.doMouseUp = true;
+    }
+  };
+
+  //wikWindowHead.mouseUp
+  this.mouseMod.mouseUp = function(evt, pe)
+  {
+    if(this.doMouseUp)
+    {
+      this.prnt.headColor = "#F0F0F0";
+      this.doMouseUp = false;
+      wikMaster.redraw();
     }
   };
 
@@ -363,6 +378,8 @@ function wikMouseHandler(cvs)
   };
   this.cvs.onmousedown = this.mouseDown;
 
+
+
   //wikMouseHandler.removeMe
   this.removeMe = function(obj)
   {
@@ -382,8 +399,6 @@ function wikMouseHandler(cvs)
     }
   };
 
-
-
   //wikMouseHandler.mouseMove
   this.mouseMove = function(evt)
   {
@@ -402,6 +417,14 @@ function wikMouseHandler(cvs)
   this.mouseUp = function(evt)
   {
     delacroix.down = 0;
+    if(delacroix.audience && delacroix.audience.length > 0)
+    {
+      var i = 0;
+      for(; i < delacroix.audience.length; ++i)
+      {
+        delacroix.audience[i].mouseMod.mouseUp(evt, delacroix.wndTranslate(evt,this));
+      }
+    }
   };
 
   this.cvs.onmouseup = this.mouseUp;
