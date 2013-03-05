@@ -521,12 +521,13 @@ function wikTest()
 
   var y = new wikTestWindow();
   y.mouseMod.whyx = {x: 0, y:0, h: 90, w: 60};
-  y.mouseMod.resize();
+
 
   var btn = new wikButton(y);
-  btn.whyx = {x:3, y:33, h:40, w:50};
-  btn.mouseMod.resize();
-
+  btn.mouseMod.whyx = {x:3, y:33, h:40, w:50};
+  btn.title = "yup";
+  y.addObj(btn);
+  y.mouseMod.resize();
 
   wikMaster.redraw();
 }
