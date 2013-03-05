@@ -340,7 +340,7 @@ function wikMouseHandler(cvs)
 {
   this.id = wikMaster.getNewId();
   this.cvs = cvs;
-  this.continue = 1;
+  this.cont= 1;
   this.downPoint  = {x:0,y:0};
   this.audience = [];
   this.down = 0;
@@ -363,9 +363,9 @@ function wikMouseHandler(cvs)
       var gens = delacroix.audience;
       if(gens)
       {
-        delacroix.continue = 1;
+        delacroix.cont = 1;
         var i = 0;
-        for(; i < gens.length && delacroix.continue; ++i)
+        for(; i < gens.length && delacroix.cont; ++i)
         {
           if(gens[i].mouseMod)
           {
@@ -405,7 +405,7 @@ function wikMouseHandler(cvs)
     if(delacroix.audience)
     {
       var i = 0;
-      for(; i < delacroix.audience.length && delacroix.continue; ++i)
+      for(; i < delacroix.audience.length && delacroix.cont; ++i)
       {
         delacroix.audience[i].mouseMod.mouseMove(evt, delacroix.wndTranslate(evt,this));
       }
