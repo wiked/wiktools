@@ -6,11 +6,20 @@ var delacroix = null
 var wikMaster = null;
 
 
+
+//--------------------------------
+// wikWindow
+//--------------------------------
+// @author: William I Krueger
+// @date: 1 Mar 2013
+// @description:
+//    wikWindow is your basic window.
 function wikWindow(cvs)
 {
   //--------------------------------
   //data members!
   //--------------------------------
+  this.id = wikMaster.getNewId();
   this.cvs = cvs;
   this.twod = null;
 
@@ -21,6 +30,7 @@ function wikWindow(cvs)
   this.bg = "#FFFFFF";
   this.otherObjs = [];
   this.mouseMod = new wikMouseMod(this);
+
 
 
 
@@ -58,7 +68,8 @@ function wikWindow(cvs)
 
     if(this.otherObjs && this.otherObjs.length >0)
     {
-      for(i = 0; i < this.otherObjs.length; ++i)
+      var i = 0;
+      for(; i < this.otherObjs.length; ++i)
       {
         this.otherObjs[i].draw();
       }
@@ -78,6 +89,27 @@ function wikWindow(cvs)
   var head = new wikWindowHead(this);
   this.addObj(head);
 
+  wikCloseButton(this);
+
+  this.cleanUp = function()
+  {
+    if(this.otherObjs)
+    {
+      var i = 0;
+      for(; i < this.otherObjs.length; ++i)
+      {
+        if(this.otherObjs[i].cleanUp)
+        {
+         this.otherObjs[i].cleanUp();
+        }
+
+        this.otherObjs[i] = null;
+      }
+      this.otherObjs.length = 0;
+      delacroix.removeMe(this);
+      wikMaster.removeMe(this);
+    }
+  }
 
   this.mouseMod.mouseMove = function(evt, pe)
   {
@@ -90,7 +122,8 @@ function wikWindow(cvs)
     var objs = this.prnt.otherObjs;
     if(objs)
     {
-      for(i = 0; i < objs.length; ++i)
+      var i = 0;
+      for(; i < objs.length; ++i)
       {
         objs[i].mouseMod.move(diffPoint);
       }
@@ -103,7 +136,8 @@ function wikWindow(cvs)
     if(this.prnt.otherObjs)
     {
       var objs = this.prnt.otherObjs;
-      for(i = 0; i < objs.length; ++i)
+      var i = 0;
+      for(; i < objs.length; i++)
       {
         if(objs[i].mouseMod)
         {
@@ -112,6 +146,7 @@ function wikWindow(cvs)
       }
     }
   };
+
 
   //--------------------------------
   //wikWindow.fillCanvasBg()
@@ -131,6 +166,7 @@ function wikWindow(cvs)
 
 function wikMouseMod(pw)
 {
+  this.id = wikMaster.getNewId();
   this.prnt = pw;
   this.bounds = {x:0, y:0, h:0,w:0};
   this.whyx = {x:0, y:0, h:0,w:0};
@@ -139,6 +175,7 @@ function wikMouseMod(pw)
   this.mouseMove = function(evt,pe){};
   this.mouseDown = function(evt,pe){};
   this.afterMove = function(diffPoint){};
+
 
   this.reboundToRect = function(rect)
   {
@@ -172,6 +209,7 @@ function wikMouseMod(pw)
 
 function wikWindowHead(pw)
 {
+  this.id = wikMaster.getNewId();
   this.mouseMod = new wikMouseMod(this);
   this.prnt = pw;
   this.title = "Title";
@@ -187,7 +225,11 @@ function wikWindowHead(pw)
     this.bounds.h = 30;
   };
 
-
+  this.cleanUp = function()
+  {
+    delacroix.removeMe(this);
+    this.mouseMod = null;
+  }
 
   this.mouseMod.mouseDown = function(evt, pe)
   {
@@ -251,6 +293,7 @@ function wikAddToMouseHandler(obj)
 
 function wikMouseHandler(cvs)
 {
+  this.id = wikMaster.getNewId();
   this.cvs = cvs;
   this.continue = 1;
   this.downPoint  = {x:0,y:0};
@@ -275,7 +318,8 @@ function wikMouseHandler(cvs)
       if(gens)
       {
         delacroix.continue = 1;
-        for(i = 0; i < gens.length && delacroix.continue; ++i)
+        var i = 0;
+        for(; i < gens.length && delacroix.continue; ++i)
         {
           if(gens[i].mouseMod)
           {
@@ -285,26 +329,46 @@ function wikMouseHandler(cvs)
       }
     }
 
-  }
-
+  };
   this.cvs.onmousedown = this.mouseDown;
+
+  this.removeMe = function(obj)
+  {
+    if(obj && obj.id)
+    {
+      if(this.audience && this.audience.length > 0)
+      {
+        var i = 0;
+        for(; i < this.audience.length; ++i)
+        {
+          if(this.audience[i].id == obj.id)
+          {
+            this.audience.splice(i,1);
+          }
+        }
+      }
+    }
+  };
+
+
 
   this.mouseMove = function(evt)
   {
     if(delacroix.audience)
     {
-      for(i = 0; i < delacroix.audience.length && delacroix.continue; ++i)
+      var i = 0;
+      for(; i < delacroix.audience.length && delacroix.continue; ++i)
       {
         delacroix.audience[i].mouseMod.mouseMove(evt, delacroix.wndTranslate(evt,this));
       }
     }
-  }
+  };
   this.cvs.onmousemove = this.mouseMove;
 
   this.mouseUp = function(evt)
   {
     delacroix.down = 0;
-  }
+  };
 
   this.cvs.onmouseup = this.mouseUp;
 
@@ -314,11 +378,12 @@ function wikMouseHandler(cvs)
     {
      this.audience.push(obj);
     }
-  }
+  };
 }
 
 function wikLabel(w)
 {
+  this.id = wikMaster.getNewId();
   //TODO: type verification!
 
   this.prnt = w;
@@ -332,10 +397,14 @@ function wikLabel(w)
 
   this.mouseMod.mouseMove  = function(evt, pe)
   {
-
     this.prnt.txt = "(".concat(evt.clientX, ",", evt.clientY,"), (", pe.x, ",", pe.y,")");
-
   };
+
+  this.cleanUp = function()
+  {
+    delacroix.removeMe(this);
+    this.mouseMod = null;
+  }
 
 
   this.draw = function()
@@ -353,10 +422,16 @@ function wikLabel(w)
 
 function wikTestWindow()
 {
-
   var c = document.getElementById("testCanvas");
-  wikMaster = new wikGlobal(c);
-  delacroix = new wikMouseHandler(c);
+  if(!wikMaster)
+  {
+   wikMaster = new wikGlobal(c);
+  }
+
+  if(!delacroix)
+  {
+    delacroix = new wikMouseHandler(c);
+  }
   var w = new wikWindow(c);
 
   return w;
@@ -364,18 +439,29 @@ function wikTestWindow()
 
 function wikTest()
 {
-
-
   var w = wikTestWindow();
   w.mouseMod.whyx = {x: 50, y:100, h: 200, w: 400};
   w.mouseMod.resize();
 //  delacroix = new wikMouseHandler(w.cvs);
+
+
+
+
 
   var t = new wikLabel(w);
   t.txt = "Text Info";
   t.whyx = {x: 20, y:190};
   w.addObj(t);
   wikAddToMouseHandler(w);
+
+
+  var y = new wikTestWindow();
+  y.mouseMod.whyx = {x: 0, y:0, h: 90, w: 60};
+  y.mouseMod.resize();
+
+  var btn = new wikButton(y);
+  btn.whyx = {x:3, y:33, h:40, w:50};
+  btn.mouseMod.resize();
 
 
   wikMaster.redraw();
@@ -387,6 +473,7 @@ function wikGlobal(cvs)
   this.cvs = cvs;
   this.bgColor = "#A0FFA0";
   this.audience = [];
+  this.nextId = 0;
 
   this.add = function(obj)
   {
@@ -409,5 +496,110 @@ function wikGlobal(cvs)
       }
     }
   };
+
+
+  this.removeMe = function(obj)
+  {
+    if(this.audience && this.audience.length > 0)
+    {
+      for(i = 0; i < this.audience.length; ++i)
+      {
+        if(this.audience[i].id = obj.id)
+        {
+          this.audience.splice(i,1);
+          obj = null;
+        }
+      }
+      this.redraw();
+    }
+  };
+
+  this.getNewId = function()
+  {
+    var ret = wikMaster.nextId;
+    wikMaster.nextId += 1;
+    return ret;
+  };
 }
 
+
+
+function wikButton(w)
+{
+  this.id = wikMaster.getNewId();
+  this.mouseMod = new wikMouseMod(this);
+  this.prnt = w;
+  this.title = "Button";
+  this.borderColor = "#000000";
+  this.bgColor = "#A0A0A0";
+  this.fontColor = "#000000";
+
+
+
+  this.mouseMod.mouseDown = function(evt, pe)
+  {
+    if(this.checkBounds(evt,pe))
+    {
+      this.prnt.buttonClicked(evt,pe);
+    }
+  }
+
+  this.mouseMod.afterMove = function(diffPoint)
+  {
+    this.bounds.x = this.whyx.x;
+    this.bounds.y = this.whyx.y;
+    this.bounds.h = this.whyx.h;
+    this.bounds.w = this.whyx.w;
+  }
+
+  this.buttonClicked = function(evt,pe){}
+
+  wikAddToMouseHandler(this);
+
+  this.draw = function()
+  {
+    var g = this.prnt.getGraphics();
+    g.fillStyle = this.bgColor;
+    var whyx = this.mouseMod.whyx;
+    g.fillRect(whyx.x, whyx.y, whyx.w, whyx.h);
+    g.strokeStyle = this.borderColor;
+    g.strokeRect(whyx.x, whyx.y, whyx.w, whyx.h);
+    g.fillStyle = this.fontColor;
+    var txtInfo = g.measureText(this.title);
+    var leftPad = whyx.x + ((whyx.w - txtInfo.width)/2); //TODO: account for LOOOOOOOOOOONG titles.
+    var topPad = whyx.y + 24;
+    g.fillText(this.title,leftPad,topPad);
+  }
+
+  this.cleanUp = function()
+  {
+    this.mouseMod = null;
+    delacroix.removeMe(this);
+  }
+
+}
+
+function wikCloseButton(w)
+{
+  var btn = new wikButton(w);
+
+  //{x: 50, y:100, h: 200, w: 400}
+
+  btn.title = "";
+  btn.buttonClicked = function(evt,pe)
+  {
+    this.prnt.cleanUp();
+  };
+
+  btn.mouseMod.resize = function()
+  {
+    var whyx = this.prnt.prnt.mouseMod.whyx;
+    var rect = {x: whyx.x + whyx.w - 13, y:whyx.y+3, h: 10, w: 10};
+    this.whyx = rect;
+    btn.mouseMod.bounds = rect;
+  }
+
+  w.addObj(btn);
+
+
+}
