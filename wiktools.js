@@ -8,7 +8,7 @@ var wikMaster = null;
 
 
 //--------------------------------
-// wikWindow
+// wikWindow class
 //--------------------------------
 // @author: William I Krueger
 // @date: 1 Mar 2013
@@ -55,6 +55,7 @@ function wikWindow(cvs)
 
   wikMaster.add(this);
 
+  //wikWindow.drawWindow
   this.drawWindow = function()
   {
     var g = this.getGraphics();
@@ -76,6 +77,7 @@ function wikWindow(cvs)
     }
   };
 
+  //wikWindow.addObj
   this.addObj = function(obj)
   {
     this.otherObjs.push(obj);
@@ -91,6 +93,7 @@ function wikWindow(cvs)
 
   wikCloseButton(this);
 
+  //wikWindow.cleanUp
   this.cleanUp = function()
   {
     if(this.otherObjs)
@@ -111,11 +114,13 @@ function wikWindow(cvs)
     }
   }
 
+  //wikWindow.mouseMove
   this.mouseMod.mouseMove = function(evt, pe)
   {
     this.prnt.drawWindow();
   }
 
+  //wikWindow.afterMove
   this.mouseMod.afterMove = function(diffPoint)
   {
     this.moveBounds(diffPoint);
@@ -131,6 +136,7 @@ function wikWindow(cvs)
     wikMaster.redraw();
   }
 
+  //wikWindow.resize
   this.mouseMod.resize = function()
   {
     if(this.prnt.otherObjs)
@@ -164,6 +170,8 @@ function wikWindow(cvs)
 
 };
 
+
+//wikMouseMod class
 function wikMouseMod(pw)
 {
   this.id = wikMaster.getNewId();
@@ -177,11 +185,13 @@ function wikMouseMod(pw)
   this.afterMove = function(diffPoint){};
 
 
+  //wikMouseMod.reboundToRect
   this.reboundToRect = function(rect)
   {
    this.bounds = {x:rect.x, y:rect.y, h:rect.h, w:rect.w};
   };
 
+  //wikMouseMod.move
   this.move = function(diffPoint)
   {
     this.whyx.x += diffPoint.x;
@@ -189,24 +199,29 @@ function wikMouseMod(pw)
     this.afterMove(diffPoint);
   };
 
+  //wikMouseMod.moveBounds
   this.moveBounds = function(diffPoint)
   {
     this.bounds.x += diffPoint.x;
     this.bounds.y += diffPoint.y;
   };
 
+  //wikMouseMod.checkBounds
   this.checkBounds = function(evt,pe)
   {
     return (pe.x >= this.bounds.x && pe.x <= (this.bounds.x + this.bounds.w)) && (pe.y >= this.bounds.y && pe.y <= (this.bounds.y + this.bounds.h));
   };
 
 
+  //wikMouseMod.resizeToRect
   this.resizeToRect = function(rect)
   {
    this.whyx = {x:rect.x, y:rect.y, h:rect.h, w:rect.w};
   };
 }
 
+
+//wikWindowHead class
 function wikWindowHead(pw)
 {
   this.id = wikMaster.getNewId();
@@ -218,19 +233,22 @@ function wikWindowHead(pw)
   this.headColor = "#F0F0F0";
   this.font = "20px Georgia";
 
+  //wikWindowHead.resize
   this.mouseMod.resize = function()
   {
     this.reboundToRect(this.prnt.prnt.mouseMod.whyx);
     this.resizeToRect(this.prnt.prnt.mouseMod.whyx);
     this.bounds.h = 30;
   };
-
+  
+  //wikWindowHead.cleanUp
   this.cleanUp = function()
   {
     delacroix.removeMe(this);
     this.mouseMod = null;
   }
 
+  //wikWindowHead.mouseDown
   this.mouseMod.mouseDown = function(evt, pe)
   {
     if(this.checkBounds(evt,pe))
@@ -240,6 +258,7 @@ function wikWindowHead(pw)
     }
   };
 
+  //wikWindowHead.mouseMove
   this.mouseMod.mouseMove = function(evt,pe)
   {
     if(this.checkBounds(evt,delacroix.downPoint) && delacroix.down)
@@ -259,6 +278,7 @@ function wikWindowHead(pw)
 
   wikAddToMouseHandler(this);
 
+  //wikWindowHead.draw
   this.draw = function(g)
   {
     var g = this.prnt.getGraphics();
@@ -282,6 +302,7 @@ function wikWindowHead(pw)
   }
 }
 
+//wikAddToMouseHandler function
 function wikAddToMouseHandler(obj)
 {
   if(delacroix)
@@ -291,6 +312,7 @@ function wikAddToMouseHandler(obj)
 
 }
 
+//wikMouseHandler class
 function wikMouseHandler(cvs)
 {
   this.id = wikMaster.getNewId();
@@ -301,12 +323,13 @@ function wikMouseHandler(cvs)
   this.down = 0;
 
 
+  //wikMouseHandler.translate
   this.wndTranslate = function(evt, obj)
   {
     return {x:evt.clientX - obj.offsetLeft, y:evt.clientY - obj.offsetTop};
   }
 
-
+  //wikMouseHandler.mouseDown
   this.mouseDown = function(evt)
   {
     if(!delacroix.down)
@@ -332,6 +355,7 @@ function wikMouseHandler(cvs)
   };
   this.cvs.onmousedown = this.mouseDown;
 
+  //wikMouseHandler.removeMe
   this.removeMe = function(obj)
   {
     if(obj && obj.id)
@@ -352,6 +376,7 @@ function wikMouseHandler(cvs)
 
 
 
+  //wikMouseHandler.mouseMove
   this.mouseMove = function(evt)
   {
     if(delacroix.audience)
@@ -365,6 +390,7 @@ function wikMouseHandler(cvs)
   };
   this.cvs.onmousemove = this.mouseMove;
 
+  //wikMouseHandler.mouseUp
   this.mouseUp = function(evt)
   {
     delacroix.down = 0;
@@ -372,6 +398,7 @@ function wikMouseHandler(cvs)
 
   this.cvs.onmouseup = this.mouseUp;
 
+  //wikMouseHandler.add
   this.add = function(obj)
   {
     if(obj.mouseMod)
@@ -381,6 +408,7 @@ function wikMouseHandler(cvs)
   };
 }
 
+//wikLabel class
 function wikLabel(w)
 {
   this.id = wikMaster.getNewId();
@@ -395,11 +423,13 @@ function wikLabel(w)
 
   wikAddToMouseHandler(this);
 
+  //wikLabel.mouseMove
   this.mouseMod.mouseMove  = function(evt, pe)
   {
     this.prnt.txt = "(".concat(evt.clientX, ",", evt.clientY,"), (", pe.x, ",", pe.y,")");
   };
 
+  //wikMouseHandler.cleanUp
   this.cleanUp = function()
   {
     delacroix.removeMe(this);
@@ -407,6 +437,7 @@ function wikLabel(w)
   }
 
 
+  //wikMouseHandler.draw
   this.draw = function()
   {
     var g = this.prnt.getGraphics();
@@ -420,6 +451,7 @@ function wikLabel(w)
 }
 
 
+//wikTestWindow function
 function wikTestWindow()
 {
   var c = document.getElementById("testCanvas");
@@ -437,6 +469,7 @@ function wikTestWindow()
   return w;
 }
 
+//wikTest function
 function wikTest()
 {
   var w = wikTestWindow();
@@ -467,7 +500,7 @@ function wikTest()
   wikMaster.redraw();
 }
 
-
+//wikGlobal class
 function wikGlobal(cvs)
 {
   this.cvs = cvs;
@@ -475,6 +508,7 @@ function wikGlobal(cvs)
   this.audience = [];
   this.nextId = 0;
 
+  //wikGlobal.add
   this.add = function(obj)
   {
     if(obj.draw)
@@ -483,6 +517,7 @@ function wikGlobal(cvs)
     }
   };
 
+  //wikGlobal.redraw
   this.redraw = function()
   {
     var g = this.cvs.getContext("2d");
@@ -498,6 +533,7 @@ function wikGlobal(cvs)
   };
 
 
+  //wikGlobal.removeMe
   this.removeMe = function(obj)
   {
     if(this.audience && this.audience.length > 0)
@@ -514,6 +550,7 @@ function wikGlobal(cvs)
     }
   };
 
+  //wikGlobal.getNewId
   this.getNewId = function()
   {
     var ret = wikMaster.nextId;
