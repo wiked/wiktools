@@ -3,6 +3,14 @@
 // Delacroix is our mouse handler.
 //    "Attention mesdames et messieurs..."
 var delacroix = null
+
+//--------------------------------
+// wikMaster
+//--------------------------------
+// wikMaster is the global-scope variable that acts as
+//     - a resource manager
+//     - a rudimentary garbage collector (eventually)
+//     - your BFF, Jill.
 var wikMaster = null;
 
 
@@ -540,7 +548,7 @@ function wikGlobal(cvs)
     {
       for(i = 0; i < this.audience.length; ++i)
       {
-        if(this.audience[i].id = obj.id)
+        if(this.audience[i].id == obj.id)
         {
           this.audience.splice(i,1);
           obj = null;
@@ -560,7 +568,7 @@ function wikGlobal(cvs)
 }
 
 
-
+//wikButton class
 function wikButton(w)
 {
   this.id = wikMaster.getNewId();
@@ -572,7 +580,7 @@ function wikButton(w)
   this.fontColor = "#000000";
 
 
-
+  //wikButton.mouseDown
   this.mouseMod.mouseDown = function(evt, pe)
   {
     if(this.checkBounds(evt,pe))
@@ -581,6 +589,7 @@ function wikButton(w)
     }
   }
 
+  //wikButton.afterMove
   this.mouseMod.afterMove = function(diffPoint)
   {
     this.bounds.x = this.whyx.x;
@@ -593,6 +602,7 @@ function wikButton(w)
 
   wikAddToMouseHandler(this);
 
+  //wikButton.draw
   this.draw = function()
   {
     var g = this.prnt.getGraphics();
@@ -608,6 +618,7 @@ function wikButton(w)
     g.fillText(this.title,leftPad,topPad);
   }
 
+  //wikButton.cleanUp
   this.cleanUp = function()
   {
     this.mouseMod = null;
@@ -616,11 +627,10 @@ function wikButton(w)
 
 }
 
+//wikCloseButton function
 function wikCloseButton(w)
 {
   var btn = new wikButton(w);
-
-  //{x: 50, y:100, h: 200, w: 400}
 
   btn.title = "";
   btn.buttonClicked = function(evt,pe)
@@ -637,6 +647,4 @@ function wikCloseButton(w)
   }
 
   w.addObj(btn);
-
-
 }
